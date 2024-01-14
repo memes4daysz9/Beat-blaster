@@ -2,7 +2,7 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
-#/[Ll]ibrary/
+/[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
@@ -47,6 +47,9 @@
 #*.opendb
 #*.VC.db
 *.dylib
+*.terrainlayer
+
+#C:\Users\benj0\Downloads\Create-with-VR_2020LTS\Create-with-VR_2020LTS\Beat-blaster\Beat-blaster
 
 
 # Unity3D generated meta files
