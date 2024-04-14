@@ -25,7 +25,7 @@ public class GameManagement : MonoBehaviour
     int Health = 100;
     int Combo = 0;
     int Score = 0;
-    int Multiplier = 1;
+    float Multiplier = 1;
 
     public GameObject Bomb; // Tag "Bomb"
     public GameObject SlashNote; // Tag "Slash"
@@ -234,7 +234,7 @@ public class GameManagement : MonoBehaviour
             Health = 100;
         }
         Combo += 1;
-        Multiplier = (int)(float)Math.Sqrt(Combo);
+        Multiplier = combo/10;
         Score += (100 * Multiplier);
     }
     void NoteMiss(){
