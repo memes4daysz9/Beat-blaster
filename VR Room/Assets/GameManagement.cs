@@ -141,7 +141,6 @@ public class GameManagement : MonoBehaviour
         }*/
     }
     void Start(){//pre Song Compiler
-        const int PreSongCount = 3;
         int SongCount;
         const string BIS = "BuiltIn/Songs"; //constant variables W
         const string BISFX = "BuiltIn/SFX";
@@ -157,7 +156,9 @@ public class GameManagement : MonoBehaviour
         SongList[1] = BIS + "Factory";
         SongList[2] = BIS + "LavenderTown";
         SongList[3] = BIS + "BreakThrough";
-
+        SongList[4] = BIS + "Quest";
+        
+        const int PreSongCount = SongList.Length;//as the get songlist hasnt been called yet, the length is how many songs are added above
         //UserSongs
         GetSongList(PreSongCount);
         LoadSongMenu();
@@ -190,7 +191,24 @@ public class GameManagement : MonoBehaviour
         calculatedmillisecondoffset = millisecondValue + ((1000/FrameRate)*2) + NoteOffset;
 
     }
-    bool SpawnNote(){
+    /*
+    gonna use a quadrant cordinate plane to calculate X and Y
+    if the blocks are 1 meter, then i just need to offset by that amount which unity already does so i dont (hopefully) need to do anything!
+    1 unity unit = 1 meter
+    */
+    
+    bool SpawnNote(int NoteType){
+           public GameObject NoteToSpawn;
+        if (NoteType == 1){
+        NoteToSpawn = NormalNote;
+        }else if(NoteType == 2){
+        NoteToSpawn = SlashNote;
+        }else if (NoteType == 3){
+        NoteToSpawn = TargetNote;
+        ]else if(NoteType == 4){
+        NoteToSpawn = BombNote;
+        }
+        
         bool NoteSpawned = false;
         while ((calculatedmillisecondoffset <= millisecondValue) && NoteSpawned != true){
             Instantiate(NormalNote, new Vector3(X,Y,0), Quaternion.Euler(0, DegreeOffset, 0));
