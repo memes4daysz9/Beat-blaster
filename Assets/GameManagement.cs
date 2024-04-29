@@ -2,31 +2,39 @@ using System;
 using UnityEngine;
 using System.IO;
 using System.Media;
+using System.Threading;
 public class GameManagement : MonoBehaviour
 {
-        bool StartSong;
-        int currentSong;
-        string[] SongList; //List Of Songs And Their Respected "ID"
-        string[] SFXList; //List Of Sound Effect and their respected "ID"
+    [Header("Random Info")]
+     public AudioSource audioData;
+        public bool StartSong;
+        public int currentSong;
+        [Header("File System")]
+        public string[] SFXList; //List Of Sound Effect and their respected "ID"
 
-        int[][] parsedArrays;
-        string[] lines;
-        string[] folderNames;//would also be the song names per each song
-    int NoteType;
-    int calculatedmillisecondoffset;
-    int millisecondValue;
-    int currentTime;
-    int TimeAtStartOfLevel;
-    int FrameRate;
-    int NoteOffset = 2000;//Note Offset for the note coming at the user
+        public int[][] parsedArrays;
+        public string[] lines;
+        
+        public string[] folderNames;//would also be the song names per each song
+                string[] SongList; //List Of Songs And Their Respected "ID"
+                public string songsFolderPath = Application.dataPath + "/Songs";
+                
+            [Header("Note Calculations")]
+    public int NoteType;
+    public int calculatedmillisecondoffset;
+    public int millisecondValue;
+    public int currentTime;
+    public int TimeAtStartOfLevel;
+    public int FrameRate;
+    public int NoteOffset = 2000;//Note Offset for the note coming at the user
 
-    
-    float MissMultiplier;
-    int Health = 100;
-    int Combo = 0;
-    int Score = 0;
+    [Header("In-Game Info")]
+    public float MissMultiplier;
+    public int Health = 100;
+    public int Combo = 0;
+    public int Score = 0;
     float Multiplier = 1;
-
+    [Header("Notes")]
     public GameObject Bomb; // Tag "Bomb"
     public GameObject SlashNote; // Tag "Slash"
     public GameObject NormalNote; //Tag "Normal"
@@ -48,6 +56,7 @@ public class GameManagement : MonoBehaviour
     int DegreeOffset;
 
     public GameObject NoteToSpawn;
+    System.Media.SoundPlayer player;
 
 
         public int[][] LoadNotesFromFile(string fileName)
@@ -98,12 +107,12 @@ public class GameManagement : MonoBehaviour
     }
 
     void GetSongList(int PreSongCount){
-    string songsFolderPath = Application.dataPath + "/Songs";
+        Debug.Log("Getting Songs");
+    
 
         if (Directory.Exists(songsFolderPath))
         {
             folderNames = Directory.GetDirectories(songsFolderPath);
-
             Debug.Log("Folders inside 'Songs':");
             foreach (string folderName in folderNames)
             {
@@ -143,33 +152,39 @@ public class GameManagement : MonoBehaviour
         }*/
     }
     void Start(){//pre Song Compiler
-        int SongCount;
-        const string BIS = "BuiltIn/Songs"; //constant variables W
-        const string BISFX = "BuiltIn/SFX";
+    audioData = GetComponent<AudioSource>();
+    Debug.Log("Starting!");
+        int SongCount = 5;
         //SFX Audio
-        SFXList[0] = BISFX + "LevelFail";
-        SFXList[1] = BISFX + "LevelComplete";
-        SFXList[2] = BISFX + "MenuMusic";
-        SFXList[3] = BISFX + "LevelEditor";
-        SFXList[4] = BISFX + "BombHit";
-        
-        //Song Audio
-        SongList[0] = BIS + "Beat Blaster";
-        SongList[1] = BIS + "Factory";
-        SongList[2] = BIS + "LavenderTown";
-        SongList[3] = BIS + "BreakThrough";
-        SongList[4] = BIS + "Quest";
-        
-        int PreSongCount = SongList.Length;//as the get songlist hasnt been called yet, the length is how many songs are added above
+        SFXList = new string[]{
+            Application.dataPath + "/BuiltIn/SFX/LevelFail",
+            Application.dataPath + "/BuiltIn/SFX/LevelComplete",
+            Application.dataPath + "/BuiltIn/SFX/MenuMusic",
+            Application.dataPath + "/BuiltIn/SFX/LevelEditor",
+            Application.dataPath + "/BuiltIn/SFX/BombHit"
+        };
+
+
+        SongList = new string[]{
+            "C:/Users/benj0/Downloads/TestPath/Beat Blaster",
+            Application.dataPath + "/BuiltIn/Songs/Factory",
+            Application.dataPath + "/BuiltIn/Songs/LavenderTown",
+            Application.dataPath + "/BuiltIn/Songs/BreakThrough",
+            Application.dataPath + "/BuiltIn/Songs/Quest"
+        };
+        Debug.Log("Songs");
+        int PreSongCount = SongCount;//as the get songlist hasnt been called yet, the length is how many songs are added above
         //UserSongs
+        Debug.Log("Calling GetSongList");
         GetSongList(PreSongCount);
+        Debug.Log("loading song menu");
         LoadSongMenu();
 
     }
-
+   
     void playSFX(int SFXID){
             string filepath = SFXList[SFXID];
-            string songPath = "/SFX.mp3";
+            string songPath = filepath + "/SFX.mp3";
             SoundPlayer player = new SoundPlayer();
             player.SoundLocation = songPath;
             player.Play();
@@ -177,9 +192,9 @@ public class GameManagement : MonoBehaviour
     }
     void PlaySong(int SongID){
             string filepath = SongList[SongID];
-            string songPath = "/Song.mp3";
-            SoundPlayer player = new SoundPlayer();
-            player.SoundLocation = songPath;
+            string fs = filepath + "/Song.wav";
+            //FileStream fs = new FileStream(filepath + "/Song.mp3",FileMode.Open, FileAccess.Read);
+            player = new System.Media.SoundPlayer(fs);
             player.Play();
     }
 
@@ -234,7 +249,7 @@ public class GameManagement : MonoBehaviour
                     DestroyNote();//calls the function to destroy the note that got hit
                     NoteHit();
                 }else if (LeftBlasterhit.collider.CompareTag(BombTag)||RightBlasterhit.collider.CompareTag(BombTag)){
-
+                    NoteMiss();
                 }
             }
         } 
@@ -270,10 +285,11 @@ public class GameManagement : MonoBehaviour
     void Update(){
         currentTime = (int)Time.fixedTime;
         FrameRate = Time.captureFramerate;
-        millisecondValue = currentTime;
-        const int PlaceHolderSongID = 1;
+        millisecondValue = (int)Math.Round(Time.time * 1000,0);
+        const int PlaceHolderSongID = 0;
         if (StartSong){
-            GamePlayMech(PlaceHolderSongID);
+            PlaySong(PlaceHolderSongID);
+            //GamePlayMech(PlaceHolderSongID);
         }
 
         
