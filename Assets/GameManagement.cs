@@ -8,12 +8,16 @@ public class GameManagement : MonoBehaviour
     [Header("Random Info")]
      public AudioSource audioData;
         public bool StartSong;
+        public bool playingSong;
         public int currentSong;
+
+        
         [Header("File System")]
         public string[] SFXList; //List Of Sound Effect and their respected "ID"
 
         public int[][] parsedArrays;
         public string[] lines;
+        public string[] values;
         
         public string[] folderNames;//would also be the song names per each song
                 string[] SongList; //List Of Songs And Their Respected "ID"
@@ -27,6 +31,8 @@ public class GameManagement : MonoBehaviour
     public int TimeAtStartOfLevel;
     public int FrameRate;
     public int NoteOffset = 2000;//Note Offset for the note coming at the user
+
+    public bool NoteSpawned = false;
 
     [Header("In-Game Info")]
     public float MissMultiplier;
@@ -79,7 +85,7 @@ public class GameManagement : MonoBehaviour
         for (int lineNumber = 0; lineNumber < lines.Length; lineNumber++)
         {
             // Split the line by commas
-            string[] values = lines[lineNumber].Split(',');
+            values = lines[lineNumber].Split(',');
 
             // Ensure the line has the correct number of values
             if (values.Length != 6)
@@ -152,6 +158,7 @@ public class GameManagement : MonoBehaviour
         }*/
     }
     void Start(){//pre Song Compiler
+    Application.targetFrameRate = 120;
     audioData = GetComponent<AudioSource>();
     Debug.Log("Starting!");
         int SongCount = 5;
@@ -199,6 +206,7 @@ public class GameManagement : MonoBehaviour
     }
 
     void SpawnCalculations(int CurrentNote){
+        Debug.Log("Calculating");
         //Instantiate(prefab, new Vector3(i * 2.0f, 0, 0), Quaternion.identity);
         NoteType = parsedArrays[CurrentNote][4];//prefab
         NoteOffset = parsedArrays[CurrentNote][0];
@@ -215,33 +223,42 @@ public class GameManagement : MonoBehaviour
     */
     
     bool SpawnNote(int NoteType){
+        int RotateAmt = 0;
+        Debug.Log("Spawning Note!");
         if (NoteType == 1){
         NoteToSpawn = NormalNote;
         }else if(NoteType == 2){
         NoteToSpawn = SlashNote;
+        RotateAmt = 180;
         }else if (NoteType == 3){
         NoteToSpawn = BlasterNote;
         }else if(NoteType == 4){
         NoteToSpawn = Bomb;
         }
         
-        bool NoteSpawned = false;
-        while ((calculatedmillisecondoffset <= millisecondValue) && NoteSpawned != true){
-            Instantiate(NormalNote, new Vector3(X,Y,0), Quaternion.Euler(0, DegreeOffset, 0));
+        NoteSpawned = false;
+        while ((calculatedmillisecondoffset >= millisecondValue) && NoteSpawned != true){
+            Instantiate(NoteToSpawn, new Vector3(X,Y,5), Quaternion.Euler(-90, DegreeOffset, RotateAmt));
+            Debug.Log("Note Spawned! Note Type:" + NoteType);
             NoteSpawned = true;
         }
         return true;
     }
     void GamePlayMech(int SongID){
-            LoadNotesFromFile(SongList[SongID] + "Notes.chart");//gets the note data for later use
+            LoadNotesFromFile(SongList[SongID] + "/Notes.chart");//gets the note data for later use
+            
             TimeAtStartOfLevel = currentTime;
             Health = 50;
             MissMultiplier = 1;
+            
             for (int i = 0; i < lines.Length; i++){//gets all the nessisary items needed for a note spawn
                 SpawnCalculations(i);
+                Debug.Log("Done calculating Note!");
+                SpawnNote(NoteType);
 
             }//start note thing
-        while (StartSong){
+            
+        while (playingSong){
 
             //the longest if statements ever jesus 
             if ((Physics.Raycast(LeftBlaster.transform.position, transform.TransformDirection(Vector3.forward), out LeftBlasterhit, 10))||(Physics.Raycast(RightBlaster.transform.position, transform.TransformDirection(Vector3.forward), out RightBlasterhit, 10))){//blaster detection lmao
@@ -284,12 +301,15 @@ public class GameManagement : MonoBehaviour
     }
     void Update(){
         currentTime = (int)Time.fixedTime;
-        FrameRate = Time.captureFramerate;
+        FrameRate =  (int)(1.0f / Time.deltaTime);
         millisecondValue = (int)Math.Round(Time.time * 1000,0);
         const int PlaceHolderSongID = 0;
         if (StartSong){
-            PlaySong(PlaceHolderSongID);
-            //GamePlayMech(PlaceHolderSongID);
+            //PlaySong(PlaceHolderSongID);
+            StartSong = false;
+            GamePlayMech(PlaceHolderSongID);
+            playingSong = true;
+            
         }
 
         
