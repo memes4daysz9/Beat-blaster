@@ -1,3 +1,4 @@
+using System.Collections;
 using System;
 using UnityEngine;
 using System.IO;
@@ -10,7 +11,7 @@ public class GameManagement : MonoBehaviour
         public bool StartSong;
         public bool playingSong;
         public int currentSong;
-
+        public bool TellNoteToSpawn;
         
         [Header("File System")]
         public string[] SFXList; //List Of Sound Effect and their respected "ID"
@@ -57,9 +58,10 @@ public class GameManagement : MonoBehaviour
     RaycastHit LeftBlasterhit;
     RaycastHit RightBlasterhit;
 
-    int X;
-    int Y;
-    int DegreeOffset;
+    public int X;
+    public int Y;
+    public int DegreeOffset;
+    public float calculatedDistanceOffset;
 
     public GameObject NoteToSpawn;
     System.Media.SoundPlayer player;
@@ -222,7 +224,7 @@ public class GameManagement : MonoBehaviour
     1 unity unit = 1 meter
     */
     
-    bool SpawnNote(int NoteType){
+    void SpawnNote(int NoteType){
         int RotateAmt = 0;
         Debug.Log("Spawning Note!");
         if (NoteType == 1){
@@ -235,16 +237,14 @@ public class GameManagement : MonoBehaviour
         }else if(NoteType == 4){
         NoteToSpawn = Bomb;
         }
-        
-        NoteSpawned = false;
-        while ((calculatedmillisecondoffset >= millisecondValue) && NoteSpawned != true){
-            Instantiate(NoteToSpawn, new Vector3(X,Y,5), Quaternion.Euler(-90, DegreeOffset, RotateAmt));
+        //if a note is travling at 1meter/sec, then divide the offset value 
+        calculatedDistanceOffset = (calculatedmillisecondoffset / 1000) + 1.5f;
+            Instantiate(NoteToSpawn, new Vector3(X,Y,calculatedDistanceOffset), Quaternion.Euler(-90, DegreeOffset, RotateAmt));
             Debug.Log("Note Spawned! Note Type:" + NoteType);
-            NoteSpawned = true;
-        }
-        return true;
+        
+        
     }
-    void GamePlayMech(int SongID){
+    IEnumerator GamePlayMech(int SongID){
             LoadNotesFromFile(SongList[SongID] + "/Notes.chart");//gets the note data for later use
             
             TimeAtStartOfLevel = currentTime;
@@ -270,6 +270,7 @@ public class GameManagement : MonoBehaviour
                 }
             }
         } 
+        yield return new WaitForSeconds(0.01f);
     }
     void OnTriggerEnter(Collider NoteDetector)//saber note detection
     {
@@ -307,7 +308,7 @@ public class GameManagement : MonoBehaviour
         if (StartSong){
             //PlaySong(PlaceHolderSongID);
             StartSong = false;
-            GamePlayMech(PlaceHolderSongID);
+            StartCoroutine(GamePlayMech(PlaceHolderSongID));
             playingSong = true;
             
         }
