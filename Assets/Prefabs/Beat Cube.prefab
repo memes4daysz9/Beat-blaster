@@ -99,7 +99,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  You: {fileID: 0}
+  Rotation: 0
+  Note: {fileID: 4844994757140056080}
 --- !u!54 &-7422238333286072364
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -24,7 +24,7 @@ public class GameManagement : MonoBehaviour
                 string[] SongList; //List Of Songs And Their Respected "ID"
                 public string songsFolderPath = Application.dataPath + "/Songs";
                 
-            [Header("Note Calculations")]
+            [Header("Note Calculations And Info")]
     public int NoteType;
     public int calculatedmillisecondoffset;
     public int millisecondValue;
@@ -32,6 +32,7 @@ public class GameManagement : MonoBehaviour
     public int TimeAtStartOfLevel;
     public int FrameRate;
     public int NoteOffset = 2000;//Note Offset for the note coming at the user
+    public float NoteMultiplier;
 
     public bool NoteSpawned = false;
 
@@ -162,6 +163,7 @@ public class GameManagement : MonoBehaviour
     void Start(){//pre Song Compiler
     Application.targetFrameRate = 120;
     audioData = GetComponent<AudioSource>();
+    NoteMultiplier = GameObject.Find("Global Behaviours").GetComponent<GlobalBehaviours>().SpeedMultipliers;
     Debug.Log("Starting!");
         int SongCount = 5;
         //SFX Audio
@@ -215,7 +217,7 @@ public class GameManagement : MonoBehaviour
         X = parsedArrays[CurrentNote][1];//(x,y,0)
         Y = parsedArrays[CurrentNote][2];//(x,y,0)
         DegreeOffset = parsedArrays[CurrentNote][3];
-        calculatedmillisecondoffset = millisecondValue + ((1000/FrameRate)*2) + NoteOffset;
+        calculatedmillisecondoffset = millisecondValue + NoteOffset;
 
     }
     /*
@@ -238,7 +240,7 @@ public class GameManagement : MonoBehaviour
         NoteToSpawn = Bomb;
         }
         //if a note is travling at 1meter/sec, then divide the offset value 
-        calculatedDistanceOffset = (calculatedmillisecondoffset / 1000) + 1.5f;
+        calculatedDistanceOffset = ((calculatedmillisecondoffset / 1000)-2.5f)*(NoteMultiplier);
             Instantiate(NoteToSpawn, new Vector3(X,Y,calculatedDistanceOffset), Quaternion.Euler(-90, DegreeOffset, RotateAmt));
             Debug.Log("Note Spawned! Note Type:" + NoteType);
         
