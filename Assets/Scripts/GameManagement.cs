@@ -233,7 +233,6 @@ public class GameManagement : MonoBehaviour
         NoteToSpawn = NormalNote;
         }else if(NoteType == 2){
         NoteToSpawn = SlashNote;
-        RotateAmt = 180;
         }else if (NoteType == 3){
         NoteToSpawn = BlasterNote;
         }else if(NoteType == 4){
@@ -241,7 +240,7 @@ public class GameManagement : MonoBehaviour
         }
         //if a note is travling at 1meter/sec, then divide the offset value 
         calculatedDistanceOffset = ((calculatedmillisecondoffset / 1000)-2.5f)*(NoteMultiplier);
-            Instantiate(NoteToSpawn, new Vector3(X,Y,calculatedDistanceOffset), Quaternion.Euler(-90, DegreeOffset, RotateAmt));
+            Instantiate(NoteToSpawn, new Vector3(X,Y,calculatedDistanceOffset), Quaternion.Euler(-90, DegreeOffset, 0));
             Debug.Log("Note Spawned! Note Type:" + NoteType);
         
         
